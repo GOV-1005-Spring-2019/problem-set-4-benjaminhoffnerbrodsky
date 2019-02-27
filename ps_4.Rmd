@@ -168,24 +168,47 @@ table_data <- orig %>%
          
          Rep = Rep / all,
          
-         Und = Und / all) %>% 
+         Und = Und / all) %>%
+  
+#Ungrouping to prepare for functions that are operating on the whole table
   
   ungroup() %>% 
+  
+#Selecting out the now vestigial all value to prepare for gt()
+  
   select(race_eth, Dem, Rep, Und) %>% 
+  
+#Slicing the race column not to filter out any variables, but to reorder them into the 
+#desired arrangement 
+  
   slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth)) 
 
+#Creating a new variable that counts the number of each kind of response for questions 1.1 and 1.2
+
 response_counts <- orig %>% 
+  
   group_by(response) %>% 
+  
   summarize(n())
 
+#Creating a new varable that lists the timestamps of dem responses in ascending order for question 1.5
+
 dem_dates <- orig %>% 
+  
   filter(response == "Dem") %>% 
+  
   select(timestamp) %>% 
+  
   arrange(timestamp)
 
+#Creating a new variable that lists the timestamps of rep responses in ascending order for question 1.5 
+
 rep_dates <- orig %>% 
+  
   filter(response == "Rep") %>% 
+  
   select(timestamp) %>% 
+  
   arrange(timestamp)
 
 ```
@@ -204,14 +227,27 @@ The first `response` of Dem came `r round(as.numeric(rep_dates[1,1] - dem_dates[
 ## Question 2
 
 ```{r table_plot, echo = FALSE, warning = FALSE, results = "asis"}
+#Setting results to "asis" to prepare for plotting a table
+
+#Initiating table function
 
 gt(table_data) %>% 
+  
+#Renaming column labels to match those of the NYT
+  
   cols_label(
+    
     Dem = "DEM.",
+    
     Rep = "REP.",
+    
     Und = "UND.",
+
     race_eth = ""
+    
     ) %>% 
+  
+
   fmt_missing(columns = vars(Und), rows = 4) %>% 
   fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>% 
   tab_style(style = cells_styles(bkgd_color = "#fbfafb", text_color = "#666666"), locations = cells_data()) %>%
@@ -250,3 +286,6 @@ ggplot(orig, aes(x = educ, y = final_weight)) +
 
 ```
 
+## Colleagues
+
+Hemanth Bharatha Chakravarthy and Dasha Met
