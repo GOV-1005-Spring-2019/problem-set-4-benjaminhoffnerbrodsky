@@ -51,6 +51,8 @@ response_counts <- orig %>%
   group_by(response) %>% 
   summarize(n())
 
+
+
 ```
 ## Question 1
 
@@ -58,11 +60,11 @@ There were `r response_counts[1, 2]` respondents who supported the Democratic ca
 
 There were `r response_counts[2, 2] - response_counts[4, 2]` more respondents who favored the Republican candidate than who were Undecided.
 
-There are two gender variables (gender and gender_combined). There are X individuals for whom these variables have different values.
+There are two gender variables (`gender` and `gender_combined`). There are `r orig %>% filter(gender != gender_combined) %>% summarize(n())` individuals for whom these variables have different values.
 
-There are X respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
+There are `r orig %>% filter(race_eth == "White", file_race_black != "White") %>% summarize(n())` respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
 
-The first response of Rep came X minutes (rounded to the nearest minute) before the first response of Dem.
+The first `response` of Rep came X minutes (rounded to the nearest minute) before the first `response` of Dem.
 
 ## Question 2
 
