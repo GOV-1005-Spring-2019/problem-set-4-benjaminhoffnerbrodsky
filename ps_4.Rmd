@@ -257,7 +257,11 @@ gt(table_data) %>%
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 4)) %>% 
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 2)) %>% 
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5)) %>% 
-  as_raw_html() %>% as.character() %>% cat()
+  tab_header(title = "Party Preferences by Race in North Carolina's 9th") %>% 
+  tab_source_note(source_note = "Source: New York Times Upshot") %>% 
+  as_raw_html() %>% 
+  as.character() %>% 
+  cat()
             
 ```
 
