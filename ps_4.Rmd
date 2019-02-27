@@ -29,7 +29,8 @@ orig <- read_csv("ps_4_elections-poll-nc09-3.csv",
   clean_names() %>%
   filter(!is.na(response), 
          !is.na(race_eth), 
-         !is.na(final_weight))
+         !is.na(final_weight),
+         educ != "[DO NOT READ] Refused") 
 
 orig$response[orig$response == "3"] <- "three"
 
@@ -97,5 +98,24 @@ gt(table_data) %>%
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5)) %>% 
   as_raw_html() %>% as.character() %>% cat()
             
+```
+
+## Question 3
+
+```{r graph, echo = FALSE, warning = FALSE}
+
+ggplot(orig, aes(x = educ, y = final_weight)) +
+  geom_violin() +
+  geom_jitter(alpha = 0.4, width = 0.2, size = 0.9) +
+  coord_flip() +
+  scale_x_discrete(limits=c("Grade school", "High school","Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree")) +
+  xlab(NULL) +
+  ylab("Weight Given to Respondent in Calculating Poll Results") +
+  labs(
+    title = "More Educated Matter Less in North Carolina 9th",
+    subtitle = "Poll gives more weight to people who are less likely to participate in polls",
+    caption = "New York Times Upshot/Siena College 2018 live polls"
+  )
+
 ```
 
