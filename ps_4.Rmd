@@ -247,20 +247,58 @@ gt(table_data) %>%
     
     ) %>% 
   
-
+#Replacing the NA in column 4 row 4 with a "-" to match NYT formatting
+  
   fmt_missing(columns = vars(Und), rows = 4) %>% 
+  
+#Changing decimals to percentages and rounding off to the ones place
+  
   fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>% 
+  
+#Setting background and text color for all cells
+  
   tab_style(style = cells_styles(bkgd_color = "#fbfafb", text_color = "#666666"), locations = cells_data()) %>%
+  
+#Overriding background and text color for column 1 
+  
   tab_style(style = cells_styles(bkgd_color = "#ffffff", text_color = "#666666"), locations = cells_data(columns = 1)) %>%
+  
+#Overriding background and text color for indvidual cells to mark which party had the most support
+#among each racial group, with red marking rep and blue marking dem 
+
+#This helps to add a binary element to the results - rather than comparing numbers, less technical
+#readers can now just see which party is colored in for each row 
+  
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 1)) %>% 
+  
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 3)) %>%
+  
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 4)) %>% 
+  
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 2)) %>% 
+  
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5)) %>% 
+
+#Setting a title to the plot
+
+#Note that this wasn't in the original NYT plot but should be added to give the data a clear purpose
+#and make its conclusions more accessible for non-technical readers
+  
   tab_header(title = "Party Preferences by Race in North Carolina's 9th") %>% 
+  
+#Setting a source for the plot
+  
+#Note that this also wasn't in the original NYT plot, since they were publishing they're own data,
+#but as we're reusing it giving credit is good practice 
+  
   tab_source_note(source_note = "Source: New York Times Upshot") %>% 
+  
+#Formats the table for html output
+  
   as_raw_html() %>% 
+  
   as.character() %>% 
+  
   cat()
             
 ```
@@ -269,16 +307,54 @@ gt(table_data) %>%
 
 ```{r violin_plot, echo = FALSE, warning = FALSE}
 
+#Initiating ggplot
+
+#Note that the x and y aesthetics are specified within ggplot because there will be two geoms
+#and both will be using the same x and y mappings
+
+#Also note that discrete value is mapped to x and the continuous value is mapped to y to fit 
+#with the format of the violin plot, even though this is the opposite mapping that is desired,
+#which will be fixed below
+
 ggplot(orig, aes(x = educ, y = final_weight)) +
+
+#Adding violin geom
+  
   geom_violin() +
+
+#Adding jitter geom while decreasing the opacity, size of dots, and width of jitter to ensure that
+#the plot isn't overly cluttered and that the dots are clearly associated with each discrete value and
+#don't drift into neighboring discrete values
+
+#Note that because jitter uses a randomizing function to assign exact placements of dots there will be some
+#variation between this plot and the example given
+  
   geom_jitter(alpha = 0.4, width = 0.2, size = 0.9) +
+  
+#Flips the coordinates for both geoms to solve the problem of needing to match the example axes order
+#while also needing to have the discrete value as the x mapping
+  
   coord_flip() +
+  
+#This is a workaround to reorder the y-axis (says x-axis because of coord_flip())
   scale_x_discrete(limits=c("Grade school", "High school","Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree")) +
+
+#Removing the y-axis label
+  
   xlab(NULL) +
+  
+#Adding an x-axis label
+  
   ylab("Weight Given to Respondent in Calculating Poll Results") +
+  
+#Adding title, substitle, and caption 
+  
   labs(
+    
     title = "More Educated Matter Less in North Carolina 9th",
+    
     subtitle = "Poll gives more weight to people who are less likely to participate in polls",
+    
     caption = "New York Times Upshot/Siena College 2018 live polls"
   )
 
