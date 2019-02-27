@@ -78,7 +78,7 @@ The first `response` of Dem came `r round(as.numeric(rep_dates[1,1] - dem_dates[
 
 ## Question 2
 
-```{r table, echo = FALSE, warning = FALSE, results = "asis"}
+```{r table_plot, echo = FALSE, warning = FALSE, results = "asis"}
 
 gt(table_data) %>% 
   cols_label(
@@ -102,7 +102,7 @@ gt(table_data) %>%
 
 ## Question 3
 
-```{r graph, echo = FALSE, warning = FALSE}
+```{r violin_plot, echo = FALSE, warning = FALSE}
 
 ggplot(orig, aes(x = educ, y = final_weight)) +
   geom_violin() +
@@ -116,6 +116,12 @@ ggplot(orig, aes(x = educ, y = final_weight)) +
     subtitle = "Poll gives more weight to people who are less likely to participate in polls",
     caption = "New York Times Upshot/Siena College 2018 live polls"
   )
+
+```
+
+## Question 4
+
+```{r categorical_plot}
 
 ```
 
