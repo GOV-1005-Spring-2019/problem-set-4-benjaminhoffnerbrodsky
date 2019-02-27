@@ -1,6 +1,6 @@
 ---
 title: "Problem Set 4"
-name: "Benjamin Hoffner-Brodsky"
+author: "Benjamin Hoffner-Brodsky"
 output: html_document
 ---
 
@@ -30,7 +30,7 @@ orig <- read_csv("ps_4_elections-poll-nc09-3.csv",
          !is.na(race_eth), 
          !is.na(final_weight))
 
-a$response[a$response == "3"] <- "three"
+orig$response[orig$response == "3"] <- "three"
 
 table_data <- orig %>% 
   select(response, race_eth, final_weight) %>% 
@@ -47,13 +47,26 @@ table_data <- orig %>%
   select(race_eth, Dem, Rep, Und) %>% 
   slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth))
 
+response_counts <- orig %>% 
+  group_by(response) %>% 
+  summarize(n())
+
 ```
+## Question 1
 
+There were `r response_counts[1, 2]` respondents who supported the Democratic candidate.
 
+There were `r response_counts[2, 2] - response_counts[4, 2]` more respondents who favored the Republican candidate than who were Undecided.
 
-```{r table}
+There are two gender variables (gender and gender_combined). There are X individuals for whom these variables have different values.
 
-##Question 2
+There are X respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
+
+The first response of Rep came X minutes (rounded to the nearest minute) before the first response of Dem.
+
+## Question 2
+
+```{r table, echo = FALSE, warning = FALSE, results = "asis"}
 
 gt(table_data) %>% 
   cols_label(
@@ -69,7 +82,8 @@ gt(table_data) %>%
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 3)) %>%
   tab_style(style = cells_styles(bkgd_color = "#dd0d27", text_color = "#ffffff"), locations = cells_data(columns = 3, rows = 4)) %>% 
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 2)) %>% 
-  tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5))
+  tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5)) %>% 
+  as_raw_html() %>% as.character() %>% cat()
             
 ```
 
