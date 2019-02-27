@@ -1,3 +1,12 @@
+---
+title: "Problem Set 4"
+name: "Benjamin Hoffner-Brodsky"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
 library(janitor)
 library(devtools)
 library(readxl)
@@ -6,7 +15,7 @@ library(gt)
 library(ggthemes)
 library(tidyverse)
 
-a <- read_csv("ps_4_elections-poll-nc09-3.csv",
+orig <- read_csv("ps_4_elections-poll-nc09-3.csv",
               col_types = cols(
                 .default = col_character(),
                 turnout_scale = col_double(),
@@ -23,7 +32,7 @@ a <- read_csv("ps_4_elections-poll-nc09-3.csv",
 
 a$response[a$response == "3"] <- "three"
 
-table_data <- a %>% 
+table_data <- orig %>% 
   select(response, race_eth, final_weight) %>% 
   group_by(response, race_eth) %>% 
   summarize(total = sum(final_weight, na.rm = TRUE)) %>% 
@@ -37,6 +46,14 @@ table_data <- a %>%
   ungroup() %>% 
   select(race_eth, Dem, Rep, Und) %>% 
   slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth))
+
+```
+
+
+
+```{r table}
+
+##Question 2
 
 gt(table_data) %>% 
   cols_label(
@@ -54,3 +71,5 @@ gt(table_data) %>%
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 2)) %>% 
   tab_style(style = cells_styles(bkgd_color = "#0089c6", text_color = "#ffffff"), locations = cells_data(columns = 2, rows = 5))
             
+```
+
