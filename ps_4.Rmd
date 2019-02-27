@@ -7,44 +7,169 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+#Setting include to false so that non-technical writers only see the relevant output
+#without the code, warning messages, or any other distracting elements
+
+#Importing and cleaning packages
+
 library(janitor)
-library(devtools)
 library(readxl)
+
+#Enables git installs to install the gt package
+
+library(devtools)
+
+#Data and time tools
+
 library(lubridate)
+
+#Table visualization package
+
 library(gt)
+
+#Preset visual elements package to supplement ggplot2 within the tidyverse
+
 library(ggthemes)
-library(chron)
+
+#Primary package group for all data manipulation and visualization 
+
+#Note that this is loaded last so as not to be masked by any other packages
+
 library(tidyverse)
 
+#Reading in data from the project directory
+
+#Note that the data must already be loaded into the directory before running
+
+#Data accessed via Gov 1005 GitHub classroom 
+
+#This section is intended to create generally tidy data that will be useful for 
+#answering all four questions
+
 orig <- read_csv("ps_4_elections-poll-nc09-3.csv",
+                 
+#Assigning data types to columns
+
+#The program runs fine without this, but will spit out a series of warning messages 
+#otherwise
+
               col_types = cols(
+                
                 .default = col_character(),
+                
                 turnout_scale = col_double(),
+                
                 turnout_score = col_double(),
+                
                 w_LV = col_double(),
+                
                 w_RV = col_double(),
+                
                 final_weight = col_double(),
+                
                 timestamp = col_datetime(format = "")
+                
               )) %>% 
+  
+#Converts column names to tidy names -- those with lower caps and spaces replaced 
+#by "_"
+
+#This is important to avoid the challenges related to having column names with spaces
+#and to create a cleaner and more consistent style 
+  
   clean_names() %>%
+  
+#Filters out data that is missing the field of interest
+
+#Note that in an earlier commit this section instead used a %in% operator to check
+#if response was within the set of responses we're interested in (Dem, Rep, Und),
+#however further investigation into the NYT chart revealed that they chose to include
+#responses marked "3" when calculating the total even though they weren't included
+#as a field in the table, so the line was changed to just remove NA values
+  
   filter(!is.na(response), 
+         
          !is.na(race_eth), 
+         
          !is.na(final_weight),
+         
          educ != "[DO NOT READ] Refused") 
+
+#Replacing all response values of "3" with the string "three"
+
+#This is done to avoid challenges associated with having a variable that is just a number, even
+#if formatted as a string 
 
 orig$response[orig$response == "3"] <- "three"
 
+#This section is intended to transform the data into a format that will be optimal 
+#for visualizing as a chart in question 2
+
 table_data <- orig %>% 
+  
+#Selecting for just the variables of interest in the table
+
+#This is necessary because spread will rearrange all of the data in a dataframe,
+#meaning that excess data should be trimmed first
+  
   select(response, race_eth, final_weight) %>% 
+  
+#Initially grouping by both race and response in order to calculate summary statistics
+#for each subset
+
+#This created too many rows which will be resolved by spread() later
+  
   group_by(response, race_eth) %>% 
+  
+#Creating total, the count of weights for each race/response pair
+
+#Note that the final_weights are being sum, rather than counting the observations,
+#to account for the divergent rates at which groups respond to polls
+
+#Summarize is used over mutate because total is now the only data that is needed
+  
   summarize(total = sum(final_weight, na.rm = TRUE)) %>% 
+  
+#Rearranges the data, grouping by the response value to create the new column names of
+#Dem, Rep, and Und. Value = total indicates that the totals will become the new row
+#observations
+  
   spread(key = response, value = total) %>%
+  
+#Ungrouping ends the above group_by, which is no longer relevant because of the spread
+  
+#This should be done before regrouping for a new variable below, to avoid a nested group
+  
   ungroup() %>% 
+  
+#Grouping by race to mutate each total as a percentage
+  
   group_by(race_eth) %>% 
+  
+#Calculating the sum of all responses as an intermediary step before converting the totals
+#to percentages in the next step
+#Note that three is included here which will result in some rows not adding up to 100%
+  
+#Also note that this is a situtation which the variables are called without using quotation
+#marks, which means that if not for the above step in which 3 was replaced with three, sum
+#would be adding the number 3 here, rather than the variable it refers to
+  
+#Finally note that na.rm is set to TRUE, which is critical because the Asian row has no 
+#responses maked Und, resulting in an NA in that column
+
+#If na.rm were not set to true, then adding Und with an NA value would set all equal to NA
+#for the Asian row which would then make Dem and Rep also NA in the next step 
+
   mutate(all = sum(Dem, Rep, Und, three, na.rm = TRUE)) %>% 
+  
+#Uses the all value to recalculate each observation as a percentage 
+  
   mutate(Dem = Dem / all,
+         
          Rep = Rep / all,
+         
          Und = Und / all) %>% 
+  
   ungroup() %>% 
   select(race_eth, Dem, Rep, Und) %>% 
   slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth)) 
