@@ -13,6 +13,7 @@ library(readxl)
 library(lubridate)
 library(gt)
 library(ggthemes)
+library(chron)
 library(tidyverse)
 
 orig <- read_csv("ps_4_elections-poll-nc09-3.csv",
@@ -45,13 +46,21 @@ table_data <- orig %>%
          Und = Und / all) %>% 
   ungroup() %>% 
   select(race_eth, Dem, Rep, Und) %>% 
-  slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth))
+  slice(match(c("White", "Black", "Hispanic", "Asian", "Other"), race_eth)) 
 
 response_counts <- orig %>% 
   group_by(response) %>% 
   summarize(n())
 
+dem_dates <- orig %>% 
+  filter(response == "Dem") %>% 
+  select(timestamp) %>% 
+  arrange(timestamp)
 
+rep_dates <- orig %>% 
+  filter(response == "Rep") %>% 
+  select(timestamp) %>% 
+  arrange(timestamp)
 
 ```
 ## Question 1
@@ -64,7 +73,7 @@ There are two gender variables (`gender` and `gender_combined`). There are `r or
 
 There are `r orig %>% filter(race_eth == "White", file_race_black != "White") %>% summarize(n())` respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
 
-The first `response` of Rep came X minutes (rounded to the nearest minute) before the first `response` of Dem.
+The first `response` of Dem came `r round(as.numeric(rep_dates[1,1] - dem_dates[1,1]), digits = 0)` minutes (rounded to the nearest minute) before the first `response` of Dem.
 
 ## Question 2
 
@@ -77,6 +86,7 @@ gt(table_data) %>%
     Und = "UND.",
     race_eth = ""
     ) %>% 
+  fmt_missing(columns = vars(Und), rows = 4) %>% 
   fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>% 
   tab_style(style = cells_styles(bkgd_color = "#fbfafb", text_color = "#666666"), locations = cells_data()) %>%
   tab_style(style = cells_styles(bkgd_color = "#ffffff", text_color = "#666666"), locations = cells_data(columns = 1)) %>%
