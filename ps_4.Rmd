@@ -362,8 +362,52 @@ ggplot(orig, aes(x = educ, y = final_weight)) +
 
 ## Question 4
 
-```{r categorical_plot}
+```{r categorical_plot, echo = FALSE}
 
+age <- orig %>% 
+  
+  #Chose to use faceted bar chart to allow the readers intuition to determine relative voter shared by 
+  #comparing heights, as this is a universally understood way to compare data. The faceting makes
+  #this easier so that the reader can derive independent conclusions from observing, which results in 
+  #the broader conclusion referenced in the subtitle 
+  
+  #The rest of this data manipulation functions much the same as the wrangling for the gtable above
+  
+  group_by(file_party, gender, response) %>% 
+  
+  summarize(total = sum(final_weight, na.rm = TRUE)) %>% 
+  
+  spread(key = response, value = total) %>% 
+  
+  ungroup() %>% 
+
+  group_by(gender) 
+
+ggplot(age, aes(x = gender, y = Rep, color = gender)) +
+  
+  geom_col(show.legend = FALSE) +
+  
+  facet_wrap(~file_party) +
+  
+  labs(
+  
+  #Title references the purpose of the data to ensure comprehension
+      
+    title = "Frequency of Voting Against Party Lines by Party and Gender in North Carolina's 9th",
+    
+  #Subtitle indicates to reader what conclusions they should make from the data to ensure that they
+  #read for the right information
+    subtitle = "Democratic Women Most Likely to Deviate",
+    
+    #Including source 
+    
+    source = "Source: New York Times Upshot"
+  ) +
+  
+  xlab("Gender") +
+  
+  ylab("Share of Votes Going to Republicans")
+  
 ```
 
 ## Colleagues
